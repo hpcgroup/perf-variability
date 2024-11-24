@@ -1,0 +1,59 @@
+    prompt 0
+    nx 64
+    ny 64
+    nz 64
+    nt 96
+    node_geometry 1 2 4 8
+    ionode_geometry 1 2 4 8
+    iseed 20685168
+    n_pseudo 5
+    load_rhmc_params rat.m0012m0363m432_hp
+    beta 6.30
+    n_dyn_masses 3
+    dyn_mass 0.0012 0.0363 0.432
+    dyn_flavors 2 1 1
+    u0 0.874164
+
+    warms 0
+    trajecs 2
+    traj_between_meas 1
+    microcanonical_time_step 0.013333
+    steps_per_trajectory 4
+    #steps_per_trajectory 160
+    cgresid_md_fa_gr .0004 .00015 .00015
+    max_multicg_md_fa_gr  1750 1750 1750
+    cgprec_md_fa_gr   1 1 1
+    cgresid_md_fa_gr .000008 .0000016 .0000016
+    max_multicg_md_fa_gr  1750 1750 1750
+    cgprec_md_fa_gr   1 1 1
+    cgresid_md_fa_gr .000008 .0000016 .0000016
+    max_multicg_md_fa_gr  1750 1750 1750
+    cgprec_md_fa_gr   1 1 1
+    cgresid_md_fa_gr .000008 .0000016 .0000016
+    max_multicg_md_fa_gr  1750 1750 1750
+    cgprec_md_fa_gr   1 1 1
+    cgresid_md_fa_gr .0000008 .0000016 .0000016
+    max_multicg_md_fa_gr  1750 1750 1750
+    cgprec_md_fa_gr   1 1 1
+    prec_ff 1
+
+    number_of_pbp_masses 3
+    max_cg_prop 1000
+    max_cg_prop_restarts 5
+    npbp_reps 1
+    prec_pbp 1
+    mass 0.0012
+    naik_term_epsilon 0
+    error_for_propagator 2e-7
+    rel_error_for_propagator 0
+    mass 0.0363
+    naik_term_epsilon 0
+    error_for_propagator 2e-7
+    rel_error_for_propagator 0
+    mass 0.432
+    naik_term_epsilon -0.116203
+    error_for_propagator 2e-15
+    rel_error_for_propagator 0
+
+    reload_parallel lattices/l6496f211b630m0012m0363m432h.1348
+    save_parallel l6496f211b630m0012m0363m432h.1348x

@@ -7,7 +7,6 @@
 #SBATCH -J bgw_sig_Si510
 #SBATCH  -C  gpu
 #SBATCH -o BGW_SIGMA_%j.out
-#SBATCH --exclusive
 # #SBATCH --reservation=n10scaling
 module purge
 
@@ -16,6 +15,7 @@ module swap PrgEnv-gnu PrgEnv-nvhpc
 module load cray-hdf5-parallel
 module load cray-fftw
 module load cray-libsci
+module load python
 module load cudatoolkit
 module load craype-accel-nvidia80
 export CRAY_ACCEL_TARGET=nvidia80
@@ -45,4 +45,4 @@ export BGW_WFN_HDF5_INDEPENDENT=1
 
 
 export OMP_NUM_THREADS=16
-srun -n 256 -c 32 --cpu-bind=cores  ./sigma.cplx.x &> out_${SLURM_JOB_ID}_$(date +"%Y-%m-%d_%H-%M-%S").txt
+srun -n 256 -c 32 --cpu-bind=cores --export=ALL,LD_PRELOAD=/pscratch/sd/c/cunyang/bgw4/software/lib/libmpiP.so  ./sigma.cplx.x
