@@ -51,4 +51,47 @@ Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
     ```
 
 ## Frontier Installation
+1. Load modules
+    ```sh
+    module reset
 
+    module load cray-mpich/8.1.28
+    module load craype-accel-amd-gfx90a
+    module load rocm
+    export MPICH_GPU_SUPPORT_ENABLED=1
+
+    # load compatible cmake version
+    module load Core/24.07
+    module load cmake/3.27.9
+    ```
+2. Configure hypre
+    - Clone hypre v2.27.0 and navigate to src: 
+        ```sh
+        git clone -b v2.27.0 https://github.com/hypre-space/hypre.git
+        cd into ~/hypre/src
+        ```
+    - Configure hypre (in hypre/src)
+        ```sh
+        ./configure --with-hip --with-gpu-arch=gfx90a --with-MPI-lib-dirs="${MPICH_DIR}/lib" --with-MPI-libs="mpi" --with-MPI-include="${MPICH_DIR}/include"
+        ```
+    - Compile hypre (in hypre/src)
+        ```sh
+        # build with make
+        make
+        ```
+3. Configure AMG2023
+    - Clone repo: 
+        ```sh
+        git clone https://github.com/pssg-int/AMG2023`
+        cd AMG2023
+        ```
+    - Configure cmake
+        ```sh
+        mkdir build && cd build
+
+        cmake .. -DHYPRE_PREFIX=/ccs/home/keshprad/hypre/src/hypre/ -DCMAKE_EXE_LINKER_FLAGS="-lrocsparse -lrocrand"
+        ```
+    - Compile AMG2023 (in AMG2023/build)
+        ```sh
+        make install
+        ```
