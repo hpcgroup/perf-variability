@@ -1,9 +1,9 @@
 # AMG2023 README
 For more detailed installation parameters, please refer to the [installation document](https://github.com/pssg-int/AMG2023/blob/main/amg-doc.pdf).
 
-## Perlmutter Compilation
+Repository: [AMG2023](https://github.com/hpcgroup/AMG2023/)
 
-Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
+## Perlmutter Compilation
 
 ### Steps to Compile
 
@@ -50,7 +50,10 @@ Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
     cmake -DHYPRE_PREFIX=/pscratch/sd/c/cunyang/AMG2023 ..
     ```
 
-## Frontier Installation
+## Frontier Compilation
+
+### Steps to Compile
+
 1. Load modules
     ```sh
     module reset
