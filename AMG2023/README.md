@@ -10,7 +10,7 @@ Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
 1. Clone the repository:
     ```sh
     cd AMG2023
-    git clone -b v2.27.0 https://github.com/hypre-space/hypre.git
+    git clone https://github.com/hypre-space/hypre.git
     ```
 
 2. Navigate to the source directory:
@@ -20,8 +20,7 @@ Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
 
 3. Load necessary modules:
     ```sh
-    module load cudatoolkit/11.7
-    module load gcc/10.3.0
+    module load cudatoolkit
     module load cray-mpich cray-libsci
     ```
 
@@ -32,9 +31,9 @@ Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
 
 5. Load additional modules:
     ```sh
-    module load cmake/3.24.3
+    module load cmake/3.30.2
     module load PrgEnv-cray
-    module load cudatoolkit/11.7
+    module load cudatoolkit
     module load craype-accel-nvidia80
     ```
 
@@ -50,5 +49,4 @@ Repository: [AMG2023](https://github.com/pssg-int/AMG2023)
     cmake -DHYPRE_PREFIX=/pscratch/sd/c/cunyang/AMG2023 ..
     ```
 
-## Frontier Installation
 
