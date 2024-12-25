@@ -32,22 +32,20 @@ echo resetting modules:
 module reset
 # load modules
 echo loading modules:
-module load cray-mpich/8.1.28
+module load cray-mpich/8.1.30
 module load craype-accel-amd-gfx90a
-module load rocm
+module load rocm/6.2.4
 
 export MPICH_GPU_SUPPORT_ENABLED=1
 export CRAY_ACCEL_TARGET=gfx90a
 export HYPRE_INSTALL_DIR=/ccs/home/keshprad/hypre/src/hypre/
 export MPIP_DLL_PATH=/ccs/home/keshprad/mpiP/libmpiP.so
-export MPIP="-f $OUTPUT_DIR"
+export MPIP="-o -f $OUTPUT_DIR"
 
 # log start date
 echo start AMG2023: $(date)
 # define command
-cmd="srun --export=ALL,LD_PRELOAD=$MPIP_DLL_PATH \
-        --output $OUTPUT_FILE \
-        --error $ERROR_FILE \
+cmd="srun --output $OUTPUT_FILE --error $ERROR_FILE \
         ./build/amg -P 8 8 8 -n 128 64 64 -problem 1 -iter 500"
 echo solving:
 echo $cmd
