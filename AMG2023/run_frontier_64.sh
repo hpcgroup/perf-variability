@@ -34,12 +34,14 @@ module reset
 echo loading modules:
 module load cray-mpich/8.1.30
 module load craype-accel-amd-gfx90a
-module load rocm/6.2.4
+module load rocm/6.1.3
 
 export MPICH_GPU_SUPPORT_ENABLED=1
 export CRAY_ACCEL_TARGET=gfx90a
 export HYPRE_INSTALL_DIR=/ccs/home/keshprad/hypre/src/hypre/
 export MPIP_DLL_PATH=/ccs/home/keshprad/mpiP/libmpiP.so
+# mpiP
+export LD_LIBRARY_PATH=/ccs/home/keshprad/mpiP:$LD_LIBRARY_PATH
 export MPIP="-o -f $OUTPUT_DIR"
 
 # log start date
