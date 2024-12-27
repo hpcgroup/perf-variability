@@ -21,11 +21,11 @@ OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
     module reset
     # load modules
     echo loading modules:
-    module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/6.2.4
+    module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/6.1.3
     module load cray-mpich/8.1.30
-    module load rocm/6.2.4
+    module load rocm/6.1.3
 
-    GPU_BENCHMARKS_ROOT=/ccs/home/keshprad/gpu-benchmarks
+    GPU_BENCHMARKS_ROOT=/lustre/orion/csc569/scratch/keshprad/gpu-benchmarks
     EXEC=$GPU_BENCHMARKS_ROOT/matmul/frontier/gemm.x
     NUM_TASKS=$(($NUM_NODES * 8))
 

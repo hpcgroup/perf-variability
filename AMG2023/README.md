@@ -60,7 +60,7 @@ Repository: [AMG2023](https://github.com/hpcgroup/AMG2023/)
 
     module load cray-mpich/8.1.30
     module load craype-accel-amd-gfx90a
-    module load rocm/6.2.4
+    module load rocm/6.1.3
     export MPICH_GPU_SUPPORT_ENABLED=1
 
     # load compatible cmake version
@@ -76,9 +76,10 @@ Repository: [AMG2023](https://github.com/hpcgroup/AMG2023/)
     - Configure hypre (in hypre/src)
         ```sh
         ./configure --with-hip --enable-device-memory-pool --enable-mixedint --with-gpu-arch=gfx90a \
-	        --with-MPI-lib-dirs="${MPICH_DIR}/lib" --with-MPI-libs="mpi" \
-	        --with-MPI-include="${MPICH_DIR}/include" \
-	        --with-extra-CUFLAGS="-I/opt/rocm-6.2.4/include -I/opt/rocm-6.2.4/include/rocsparse -L/opt/rocm-6.2.4/lib"
+            --with-MPI-lib-dirs="${MPICH_DIR}/lib" --with-MPI-libs="mpi" \
+            --with-MPI-include="${MPICH_DIR}/include" \
+            CFLAGS="-I${ROCM_PATH}/include/ -I${ROCM_PATH}/llvm/include/ -I${ROCM_PATH}/include/rocsparse/" \
+            LDFLAGS="-L${ROCM_PATH}/lib/ -L${ROCM_PATH}/llvm/lib/ -lrocsparse"
         ```
     - Compile hypre (in hypre/src)
         ```sh
@@ -91,11 +92,17 @@ Repository: [AMG2023](https://github.com/hpcgroup/AMG2023/)
         git clone https://github.com/pssg-int/AMG2023`
         cd AMG2023
         ```
+    - Add mpiP to LD_LIBRARY_PATH
+        ```sh
+        export LD_LIBRARY_PATH=/ccs/home/keshprad/mpiP:$LD_LIBRARY_PATH
+        ```
     - Configure cmake
         ```sh
         mkdir build && cd build
 
-        cmake .. -DHYPRE_PREFIX=/ccs/home/keshprad/hypre/src/hypre/ -DCMAKE_EXE_LINKER_FLAGS="-lrocsparse -lrocrand"
+        cmake .. -DHYPRE_PREFIX=/ccs/home/keshprad/hypre/src/hypre/ \
+            -DCMAKE_C_FLAGS="-I${ROCM_PATH}/include/ -I${ROCM_PATH}/llvm/include/ -I${ROCM_PATH}/include/rocsparse/" \
+            -DCMAKE_EXE_LINKER_FLAGS="-L${ROCM_PATH}/lib/ -L${ROCM_PATH}/llvm/lib/ -lrocsparse -lrocrand"
         ```
     - Compile AMG2023 (in AMG2023/build)
         ```sh
