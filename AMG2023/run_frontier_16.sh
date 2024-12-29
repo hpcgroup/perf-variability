@@ -3,6 +3,7 @@
 #SBATCH -n 128
 #SBATCH -q normal
 #SBATCH -J amg
+#SBATCH --gpu-bind none
 #SBATCH -t 00:30:00
 #SBATCH -A csc569
 #SBATCH --output /lustre/orion/csc569/scratch/keshprad/perfvar/AMG2023_logs/16nodes/%x-%j/output-AMG2023.log
