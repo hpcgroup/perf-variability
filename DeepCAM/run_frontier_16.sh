@@ -3,7 +3,8 @@
 #SBATCH -n 128
 #SBATCH -q normal
 #SBATCH -J deepcam
-#SBATCH -t 01:30:00
+#SBATCH --gpu-bind none
+#SBATCH -t 01:00:00
 #SBATCH -A csc569
 #SBATCH --output /lustre/orion/csc569/scratch/keshprad/perfvar/deepcam_logs/16nodes/%x-%j/job-output.log
 #SBATCH --error /lustre/orion/csc569/scratch/keshprad/perfvar/deepcam_logs/16nodes/%x-%j/job-error.log
@@ -38,9 +39,7 @@ module load PrgEnv-gnu/8.5.0
 module load rocm/6.1.3
 module load craype-accel-amd-gfx90a
 module load cray-python/3.9.13.1
-module load ums/default
-module load ums002/default
-module load cray-hdf5-parallel/1.12.2.1
+module list
 
 # activate virtual env
 echo activating virtual env:
