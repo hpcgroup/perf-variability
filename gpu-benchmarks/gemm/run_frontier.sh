@@ -24,6 +24,7 @@ OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
     module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/6.1.3
     module load cray-mpich/8.1.30
     module load rocm/6.1.3
+    module list
 
     GPU_BENCHMARKS_ROOT=/lustre/orion/csc569/scratch/keshprad/gpu-benchmarks
     EXEC=$GPU_BENCHMARKS_ROOT/matmul/frontier/gemm.x
@@ -43,4 +44,4 @@ OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
     echo $CMD
     $CMD
     echo end gemm: $(date)
-} >> $OUTPUT_FILE
+} &>> $OUTPUT_FILE
