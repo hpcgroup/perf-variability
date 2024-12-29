@@ -3,6 +3,7 @@
 #SBATCH -n 512
 #SBATCH -q normal
 #SBATCH -J amg
+#SBATCH --gpu-bind none
 #SBATCH -t 00:30:00
 #SBATCH -A csc569
 #SBATCH --output /lustre/orion/csc569/scratch/keshprad/perfvar/AMG2023_logs/64nodes/%x-%j/output-AMG2023.log
@@ -39,7 +40,6 @@ module load rocm/6.1.3
 export MPICH_GPU_SUPPORT_ENABLED=1
 export CRAY_ACCEL_TARGET=gfx90a
 export HYPRE_INSTALL_DIR=/ccs/home/keshprad/hypre/src/hypre/
-export MPIP_DLL_PATH=/ccs/home/keshprad/mpiP/libmpiP.so
 # mpiP
 export LD_LIBRARY_PATH=/ccs/home/keshprad/mpiP:$LD_LIBRARY_PATH
 export MPIP="-o -f $OUTPUT_DIR"
