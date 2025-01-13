@@ -17,13 +17,14 @@ ERROR_FILE=$OUTPUT_DIR/error-AMG2023.log
 
 # Run gpu benchmarks
 COMM_TYPE=mpi
+ROCM_VERSION=6.1.3
 PERF_VARIABILITY_ROOT=/ccs/home/keshprad/perf-variability
 echo running allreduce benchmark
-bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allreduce/run_frontier.sh $COMM_TYPE $SLURM_JOB_NUM_NODES $OUTPUT_DIR
+bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allreduce/run_frontier.sh $COMM_TYPE $ROCM_VERSION $SLURM_JOB_NUM_NODES $OUTPUT_DIR
 # echo running allgather benchmark
-# bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allgather/run_frontier.sh $COMM_TYPE $SLURM_JOB_NUM_NODES $OUTPUT_DIR
+# bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allgather/run_frontier.sh $COMM_TYPE $ROCM_VERSION $SLURM_JOB_NUM_NODES $OUTPUT_DIR
 echo running gemm benchmark
-bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/gemm/run_frontier.sh $SLURM_JOB_NUM_NODES $OUTPUT_DIR
+bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/gemm/run_frontier.sh $ROCM_VERSION $SLURM_JOB_NUM_NODES $OUTPUT_DIR
 
 APP_ROOT=/ccs/home/keshprad/AMG2023
 cd $APP_ROOT
