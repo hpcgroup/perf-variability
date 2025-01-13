@@ -4,16 +4,25 @@
 # run like: bash /ccs/home/keshprad/gpu-benchmarks/benchmark/frontier/allgather.sh <comm_type> <num_nodes> <output_dir>
 
 #!/bin/bash
-if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <communication_type> <number_of_nodes> <output_dir>"
+if [ "$#" -ne 4 ]; then
+    echo "Usage: $0 <communication_type> <rocm_version> <number_of_nodes> <output_dir>"
     exit 1
 fi
 # `mpi` or `rccl`
 COMM_TYPE=$1
+# `5.7.1` or `6.1.3`
+ROCM_VERSION=$2
 # `16` or `64`
-NUM_NODES=$2
+NUM_NODES=$3
 # output directory
-OUTPUT_DIR=$3
+OUTPUT_DIR=$4
+
+# setup cray-mpich version
+if [[ "$ROCM_VERSION" == "6.1.3" ]]; then
+    MPICH_VERSION=8.1.30
+else
+    MPICH_VERSION=8.1.28
+fi
 
 OUTPUT_FILE=$OUTPUT_DIR/output-allgather.log
 
@@ -23,13 +32,13 @@ OUTPUT_FILE=$OUTPUT_DIR/output-allgather.log
     module reset
     # load modules
     echo loading modules:
-    module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/6.1.3
-    module load cray-mpich/8.1.30
-    module load rocm/6.1.3
+    module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/${ROCM_VERSION}
+    module load cray-mpich/${MPICH_VERSION}
+    module load rocm/${ROCM_VERSION}
     module list
 
     GPU_BENCHMARKS_ROOT=/lustre/orion/csc569/scratch/keshprad/gpu-benchmarks
-    EXEC=$GPU_BENCHMARKS_ROOT/allgather_$COMM_TYPE.x
+    EXEC=$GPU_BENCHMARKS_ROOT/allgather_$COMM_TYPE\_rocm-${ROCM_VERSION}.x
     NUM_TASKS=$(($NUM_NODES * 8))
     MIN_MSG_SIZE=$((1 * 1024))
     MAX_MSG_SIZE=$((1 * 1024 * 1024))
