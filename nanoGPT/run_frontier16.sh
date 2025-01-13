@@ -3,29 +3,18 @@
 #SBATCH -n 128
 #SBATCH -q normal
 #SBATCH -J nanogpt
-#SBATCH -t 01:00:00
+#SBATCH --gpu-bind none
+#SBATCH -t 00:30:00
 #SBATCH -A csc569
 #SBATCH --output /lustre/orion/csc569/scratch/keshprad/perfvar/nanoGPT_logs/16nodes/%x-%j/job-output.log
 #SBATCH --error /lustre/orion/csc569/scratch/keshprad/perfvar/nanoGPT_logs/16nodes/%x-%j/job-error.log
 #SBATCH --exclusive
 # Run like: sbatch run_frontier16.sh
 
+echo "start run: $(date)"
 export JOB_OUTPUT_PATH=/lustre/orion/csc569/scratch/keshprad/perfvar/nanoGPT_logs/16nodes/$SLURM_JOB_NAME-$SLURM_JOB_ID
 OUTPUT_FILE=$JOB_OUTPUT_PATH/output-nanoGPT.log
 ERROR_FILE=$JOB_OUTPUT_PATH/error-nanoGPT.log
-
-# Run gpu benchmarks
-COMM_TYPE=rccl
-PERF_VARIABILITY_ROOT=/ccs/home/keshprad/perf-variability
-echo running allreduce benchmark
-bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allreduce/run_frontier.sh $COMM_TYPE $SLURM_JOB_NUM_NODES $JOB_OUTPUT_PATH
-# echo running allgather benchmark
-# bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allgather/run_frontier.sh $COMM_TYPE $SLURM_JOB_NUM_NODES $JOB_OUTPUT_PATH
-echo running gemm benchmark
-bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/gemm/run_frontier.sh $SLURM_JOB_NUM_NODES $JOB_OUTPUT_PATH
-
-APP_ROOT=/lustre/orion/csc569/scratch/keshprad/nanoGPT
-cd $APP_ROOT
 
 export SCRATCH="/lustre/orion/csc569/scratch/keshprad"
 export WRKSPC="${SCRATCH}/nanoGPT"
@@ -35,56 +24,63 @@ export HF_DATASETS_CACHE="${HF_HOME}/datasets"
 cd $WRKSPC
 
 # load modules
-rocm_version=6.1.3
+ROCM_VERSION=6.1.3
+echo resetting modules:
 module reset
+echo loading modules:
 module load PrgEnv-gnu/8.5.0
-module load rocm/${rocm_version}
+module load rocm/${ROCM_VERSION}
 module load craype-accel-amd-gfx90a
 module load cray-python/3.9.13.1
-module load gcc-native/12.3
 module load cray-mpich/8.1.30
+module list
 # activate env
 source ${WRKSPC}/axonn_nanogpt/bin/activate
 
 NNODES=$SLURM_JOB_NUM_NODES
 GPUS=$(( NNODES * 8 ))
 ## master addr and port
-export MASTER_ADDR=$(hostname -i)
-export MASTER_PORT=3442
-export WORLD_SIZE=${GPUS}
+# setting variables for torch.distributed
+export MASTER_ADDR=$(hostname)
+export MASTER_PORT=29500
+export WORLD_SIZE=$GPUS
+export OMP_NUM_THREADS=7
 
-## nccl env vars to speedup stuff
-export CUDA_DEVICE_MAX_CONNECTIONS=1
-export NCCL_NET_GDR_LEVEL=PHB
-export CUDA_VISIBLE_DEVICES=7,6,5,4,3,2,1,0
+## some RCCL env variables
+export FI_CXI_ATS=0
+export HSA_FORCE_FINE_GRAIN_PCIE=1
 export NCCL_CROSS_NIC=1
 export NCCL_SOCKET_IFNAME=hsn0
-export NCCL_NET="AWS Libfabric"
-export NCCL_TIMEOUT=1200
-export TORCH_NCCL_HEARTBEAT_TIMEOUT_SEC=1200
-export MPICH_GPU_SUPPORT_ENABLED=0
+export CUDA_VISIBLE_DEVICES=7,6,5,4,3,2,1,0
+export CUDA_DEVICE_MAX_CONNECTIONS=1
 # AWS-OFI-RCCL
 export LD_LIBRARY_PATH="${WRKSPC}/repos/aws-ofi-rccl/lib:$LD_LIBRARY_PATH"
+# other
+export MPICH_GPU_SUPPORT_ENABLED=1
+export GPU_MAX_HW_QUEUES=1
+export OFI_NCCL_USE_IPV6_TCP=1
 
 SCRIPT="train_frontier.py config/train_gpt_neox_5B.py"
 
-# run without profiler
-export WITH_PROFILER=0
-# log start date
-echo start nanoGPT_withoutprof: $(date)
-run_cmd="srun -N $NNODES -n $GPUS --cpu-bind=cores --gpus-per-node=8 --ntasks-per-node=8 scripts/get_rank.sh python -u $SCRIPT &> $JOB_OUTPUT_PATH/output-nanoGPT_withoutprof.log"
-echo $run_cmd
-eval $run_cmd
-# log end date
-echo end nanoGPT_withoutprof: $(date)
-
-
 # run with profiler
 export WITH_PROFILER=1
+OUTPUT_FILE="$JOB_OUTPUT_PATH/output-nanoGPT.log"
 # log start date
-echo start nanoGPT: $(date)
-run_cmd="srun -N $NNODES -n $GPUS --cpu-bind=cores --gpus-per-node=8 --ntasks-per-node=8 scripts/get_rank.sh python -u $SCRIPT &> $JOB_OUTPUT_PATH/output-nanoGPT.log"
-echo $run_cmd
-eval $run_cmd
+echo "start nanoGPT: $(date)" &>> $OUTPUT_FILE
+run_cmd="srun -N $NNODES -n $GPUS --cpu-bind=cores --gpus-per-node=8 --ntasks-per-node=8 scripts/get_rank.sh python -u $SCRIPT"
+echo $run_cmd &>> $OUTPUT_FILE
+eval $run_cmd &>> $OUTPUT_FILE
 # log end date
-echo end nanoGPT: $(date)
+echo "end nanoGPT: $(date)" &>> $OUTPUT_FILE
+
+# Run gpu benchmarks
+COMM_TYPE=rccl
+PERF_VARIABILITY_ROOT=/ccs/home/keshprad/perf-variability
+echo running allreduce benchmark
+bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allreduce/run_frontier.sh $COMM_TYPE $ROCM_VERSION $SLURM_JOB_NUM_NODES $JOB_OUTPUT_PATH
+# echo running allgather benchmark
+# bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allgather/run_frontier.sh $COMM_TYPE $ROCM_VERSION $SLURM_JOB_NUM_NODES $JOB_OUTPUT_PATH
+echo running gemm benchmark
+bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/gemm/run_frontier.sh $ROCM_VERSION $SLURM_JOB_NUM_NODES $JOB_OUTPUT_PATH
+
+echo "end run: $(date)"

@@ -4,14 +4,23 @@
 # run like: bash /ccs/home/keshprad/gpu-benchmarks/benchmark/frontier/gemm.sh <num_nodes> <output_dir>
 
 #!/bin/bash
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <number_of_nodes> <output_dir>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <rocm_version> <number_of_nodes> <output_dir>"
     exit 1
 fi
+# `5.7.1` or `6.1.3`
+ROCM_VERSION=$1
 # `16` or `64`
-NUM_NODES=$1
+NUM_NODES=$2
 # output directory
-OUTPUT_DIR=$2
+OUTPUT_DIR=$3
+
+# setup cray-mpich version
+if [[ "$ROCM_VERSION" == "6.1.3" ]]; then
+    MPICH_VERSION=8.1.30
+else
+    MPICH_VERSION=8.1.28
+fi
 
 OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
 
@@ -21,13 +30,13 @@ OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
     module reset
     # load modules
     echo loading modules:
-    module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/6.1.3
-    module load cray-mpich/8.1.30
-    module load rocm/6.1.3
+    module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/${ROCM_VERSION}
+    module load cray-mpich/${MPICH_VERSION}
+    module load rocm/${ROCM_VERSION}
     module list
 
     GPU_BENCHMARKS_ROOT=/lustre/orion/csc569/scratch/keshprad/gpu-benchmarks
-    EXEC=$GPU_BENCHMARKS_ROOT/matmul/frontier/gemm.x
+    EXEC=$GPU_BENCHMARKS_ROOT/matmul/frontier/gemm_rocm-${ROCM_VERSION}.x
     NUM_TASKS=$(($NUM_NODES * 8))
 
     export MPICH_GPU_SUPPORT_ENABLED=1
