@@ -1,26 +1,27 @@
 #!/bin/bash
 #SBATCH --job-name=milc_40.16
-#SBATCH --account=csc569
+#SBATCH --account=csc547
 #SBATCH --partition=batch
 #SBATCH --qos=normal
 #SBATCH --nodes=16
 #SBATCH --ntasks=128
 #SBATCH --gpu-bind=none
 #SBATCH --exclusive
-#SBATCH -t 00:30:00
-#SBATCH --output /lustre/orion/csc569/scratch/keshprad/perfvar/MILC_logs/16nodes/%x-%j/job-output.log
-#SBATCH --error /lustre/orion/csc569/scratch/keshprad/perfvar/MILC_logs/16nodes/%x-%j/job-error.log
+#SBATCH -t 00:45:00
+#SBATCH --output /lustre/orion/csc547/scratch/keshprad/perfvar/MILC_logs/16nodes/%x-%j/job-output.log
+#SBATCH --error /lustre/orion/csc547/scratch/keshprad/perfvar/MILC_logs/16nodes/%x-%j/job-error.log
 # RUN LIKE: sbatch run_frontier_40.16.sh
 
 echo "start run: $(date)"
-
-ORION_SCRATCH=/lustre/orion/csc569/scratch/keshprad
+# HPE Cassini performance counters: collect network data
+export MPICH_OFI_CXI_COUNTER_REPORT=5
+ORION_SCRATCH=/lustre/orion/csc547/scratch/keshprad
 OUTPUT_DIR=$ORION_SCRATCH/perfvar/MILC_logs/16nodes/$SLURM_JOB_NAME-$SLURM_JOB_ID
 MILC_OUTPUT_FILE=$OUTPUT_DIR/output-MILC.log
 
 # Run gpu benchmarks
 COMM_TYPE=mpi
-ROCM_VERSION=6.1.3
+ROCM_VERSION=5.7.1
 PERF_VARIABILITY_ROOT=/ccs/home/keshprad/perf-variability
 echo running allreduce benchmark
 bash $PERF_VARIABILITY_ROOT/gpu-benchmarks/allreduce/run_frontier.sh $COMM_TYPE $ROCM_VERSION $SLURM_JOB_NUM_NODES $OUTPUT_DIR
@@ -36,6 +37,8 @@ exe=${MILC_QCD_DIR}/ks_imp_rhmc/su3_rhmd_hisq
 input=$PERF_VARIABILITY_ROOT/MILC/params_frontier.40.16
 # Load modules, setup environment
 source ${BENCH_TOPDIR}/build/env.sh
+module load ums ums023 hpctoolkit
+module list &>> "$OUTPUT_DIR/job-output.log"
 
 # Define environment variables
 # mpich
@@ -51,6 +54,10 @@ export QUDA_MILC_HISQ_RECONSTRUCT_SLOPPY=9
 export OMP_NUM_THREADS=7
 export OMP_PROC_BIND="spread, spread, spread"
 export SLURM_CPU_BIND="cores"
+# hpctoolkit
+export LD_LIBRARY_PATH=${HPCTOOLKIT_ROOT}/lib/hpctoolkit:$LD_LIBRARY_PATH
+export HPCTOOLKIT_MEASUREMENT_DIR=$OUTPUT_DIR/hpctoolkit
+export HPCTOOLKIT_DB_DIR="$OUTPUT_DIR/hpctoolkit-db"
 
 # qudatune
 # Tuning results are stored in qudatune_dir.
@@ -60,7 +67,7 @@ if [ ! -d ${QUDA_RESOURCE_PATH} ]; then
 fi
 
 # mpiP
-export LD_LIBRARY_PATH=/ccs/home/keshprad/mpiP_rocm-${CRAY_ROCM_VERSION}:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/ccs/home/keshprad/libdwarf-20210528/lib:$LD_LIBRARY_PATH
 export MPIP="-o -f $OUTPUT_DIR"
 export MPIP_DLL_PATH=/ccs/home/keshprad/mpiP_rocm-${CRAY_ROCM_VERSION}/libmpiP.so
 
