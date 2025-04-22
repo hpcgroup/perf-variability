@@ -4,19 +4,21 @@
 #SBATCH -q normal
 #SBATCH -J deepcam
 #SBATCH --gpu-bind none
-#SBATCH -t 00:30:00
-#SBATCH -A csc569
-#SBATCH --output /lustre/orion/csc569/scratch/keshprad/perfvar/deepcam_logs/16nodes/%x-%j/job-output.log
-#SBATCH --error /lustre/orion/csc569/scratch/keshprad/perfvar/deepcam_logs/16nodes/%x-%j/job-error.log
+#SBATCH -t 01:00:00
+#SBATCH -A csc547
+#SBATCH --output /lustre/orion/csc547/scratch/keshprad/perfvar/deepcam_logs/16nodes/%x-%j/job-output.log
+#SBATCH --error /lustre/orion/csc547/scratch/keshprad/perfvar/deepcam_logs/16nodes/%x-%j/job-error.log
 #SBATCH --exclusive
 # Run like: sbatch run_frontier_16.sh
 
 echo "start run: $(date)"
-export JOB_OUTPUT_PATH=/lustre/orion/csc569/scratch/keshprad/perfvar/deepcam_logs/16nodes/$SLURM_JOB_NAME-$SLURM_JOB_ID
+# HPE Cassini performance counters: collect network data
+export MPICH_OFI_CXI_COUNTER_REPORT=5
+export JOB_OUTPUT_PATH=/lustre/orion/csc547/scratch/keshprad/perfvar/deepcam_logs/16nodes/$SLURM_JOB_NAME-$SLURM_JOB_ID
 OUTPUT_FILE=${JOB_OUTPUT_PATH}/output-deepcam.log
 ERROR_FILE=${JOB_OUTPUT_PATH}/error-deepcam.log
 
-export SCRATCH="/lustre/orion/csc569/scratch/keshprad"
+export SCRATCH="/lustre/orion/csc547/scratch/keshprad"
 export APP_ROOT="${SCRATCH}/deepcam"
 APP_WORKING_DIR=${APP_ROOT}/hpc/deepcam/src/deepCam
 cd $APP_WORKING_DIR
@@ -30,6 +32,8 @@ module load PrgEnv-gnu/8.5.0
 module load rocm/6.1.3
 module load craype-accel-amd-gfx90a
 module load cray-python/3.9.13.1
+module load cray-hdf5-parallel/1.12.2.9
+module load libfabric/1.20.1
 module list
 
 # activate virtual env
@@ -53,11 +57,14 @@ export MIOPEN_USER_DB_PATH="/tmp/my-miopen-cache-${SLURM_JOB_ID}"
 export MIOPEN_CUSTOM_CACHE_DIR=${MIOPEN_USER_DB_PATH}
 
 ## some RCCL env variables
+export FI_CXI_RDZV_THRESHOLD=0
+export FI_CXI_RDZV_GET_MIN=0
+export FI_CXI_RDZV_EAGER_SIZE=0
 export FI_CXI_ATS=0
 export HSA_FORCE_FINE_GRAIN_PCIE=1
 export NCCL_CROSS_NIC=1
 export NCCL_SOCKET_IFNAME=hsn0
-export CUDA_VISIBLE_DEVICES=7,6,5,4,3,2,1,0
+export ROCR_VISIBLE_DEVICES=7,6,5,4,3,2,1,0
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 # AWS-OFI-RCCL
 export LD_LIBRARY_PATH=${APP_ROOT}/repos/aws-ofi-rccl/lib:$LD_LIBRARY_PATH
@@ -90,9 +97,9 @@ BENCH_RCP_BASELINE="\
 
 # define command
 MAX_EPOCHS=1
-cmd="srun --export=ALL --tasks-per-node=8 --gpus-per-node=8 \
-        --gpu-bind=closest --gpus-per-task=1 \
-        --cpu-bind=none --hint=nomultithread \
+cmd="srun --export=ALL --ntasks-per-node=8 --gpus-per-node=8 \
+        --gpu-bind=none --gpus-per-task=1 \
+        --cpu-bind=cores \
         python train.py \
             ${BENCH_RCP_BASELINE} \
             --data_dir_prefix ${APP_ROOT}/data/All-Hist \
@@ -104,8 +111,24 @@ cmd="srun --export=ALL --tasks-per-node=8 --gpus-per-node=8 \
             --local_batch_size 2"
 
 # run with profiler
+export WITH_PERFORMANCE_COUNTERS=0
 export WITH_PROFILER=1
 OUTPUT_FILE="$JOB_OUTPUT_PATH/output-deepcam.log"
+# clear cache
+rm -rf ${MIOPEN_USER_DB_PATH}
+mkdir -p ${MIOPEN_USER_DB_PATH}
+# log start date
+echo "start deepcam: $(date)" &>> $OUTPUT_FILE
+# execute command
+echo $cmd &>> $OUTPUT_FILE
+eval $cmd &>> $OUTPUT_FILE
+# log end date
+echo "end deepcam: $(date)" &>> $OUTPUT_FILE
+
+# run with cassini performance counters
+export WITH_PERFORMANCE_COUNTERS=1
+export WITH_PROFILER=0
+OUTPUT_FILE="$JOB_OUTPUT_PATH/output-deepcam-with_performance_counters.log"
 # clear cache
 rm -rf ${MIOPEN_USER_DB_PATH}
 mkdir -p ${MIOPEN_USER_DB_PATH}

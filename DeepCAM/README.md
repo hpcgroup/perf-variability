@@ -23,7 +23,7 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
     module load cray-python/3.9.13.1
 - Create env variables
     ```bash
-    DEEPCAM_ROOT=/lustre/orion/csc569/scratch/keshprad/deepcam/
+    DEEPCAM_ROOT=/lustre/orion/csc547/scratch/keshprad/deepcam/
     PYVENV_ROOT=${DEEPCAM_ROOT}/.venv
     PYVENV_SITEPKGS=${PYVENV_ROOT}/lib/python3.9/site-packages
 
@@ -117,7 +117,7 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
 - Download from PSSG Frontier repo for DeepCAM (linked at top of README)
     ```bash
     # REPLACE WITH YOUR PATH
-    PRFX=/lustre/orion/csc569/scratch/keshprad
+    PRFX=/lustre/orion/csc547/scratch/keshprad
     DEEPCAM_ROOT=${PRFX}/deepcam
 
     mkdir -p ${DEEPCAM_ROOT}
