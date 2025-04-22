@@ -35,20 +35,25 @@ OUTPUT_FILE=$OUTPUT_DIR/output-allgather.log
     module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/${ROCM_VERSION}
     module load cray-mpich/${MPICH_VERSION}
     module load rocm/${ROCM_VERSION}
+    module load libfabric/1.20.1
     module list
 
-    GPU_BENCHMARKS_ROOT=/lustre/orion/csc569/scratch/keshprad/gpu-benchmarks
+    GPU_BENCHMARKS_ROOT=/lustre/orion/csc547/scratch/keshprad/gpu-benchmarks
     EXEC=$GPU_BENCHMARKS_ROOT/allgather_$COMM_TYPE\_rocm-${ROCM_VERSION}.x
     NUM_TASKS=$(($NUM_NODES * 8))
-    MIN_MSG_SIZE=$((1 * 1024))
-    MAX_MSG_SIZE=$((1 * 1024 * 1024))
     ITERATIONS=100
+    if [[ "$COMM_TYPE" == "mpi" ]]; then
+        MIN_MSG_SIZE=$((1  * 1024))                 # 1 KB
+        MAX_MSG_SIZE=$((1  * 1024 * 1024))          # 1 MB
+    elif [[ "$COMM_TYPE" == "rccl" ]]; then
+        MIN_MSG_SIZE=$((16 * 1024 * 1024))          # 16 MB
+        MAX_MSG_SIZE=$((2  * 1024 * 1024 * 1024))   # 2 GB
+    fi
 
     export MPICH_GPU_SUPPORT_ENABLED=1
     export LD_LIBRARY_PATH="${CRAY_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
 
     echo start allgather: $(date)
-    For MPI-bench we should use --gpus-per-node --gpus-per-task --ntasks-per-node , and  --gpu-bind=none in srun.
     CMD="srun -N $NUM_NODES -n $NUM_TASKS \
             --gpus-per-node 8 \
             --gpus-per-task 1 \

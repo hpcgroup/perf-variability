@@ -33,14 +33,18 @@ OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
     module load PrgEnv-cray craype-accel-amd-gfx90a cpe/23.05 amd/${ROCM_VERSION}
     module load cray-mpich/${MPICH_VERSION}
     module load rocm/${ROCM_VERSION}
+    module load libfabric/1.20.1
     module list
 
-    GPU_BENCHMARKS_ROOT=/lustre/orion/csc569/scratch/keshprad/gpu-benchmarks
+    GPU_BENCHMARKS_ROOT=/lustre/orion/csc547/scratch/keshprad/gpu-benchmarks
     EXEC=$GPU_BENCHMARKS_ROOT/matmul/frontier/gemm_rocm-${ROCM_VERSION}.x
     NUM_TASKS=$(($NUM_NODES * 8))
 
     export MPICH_GPU_SUPPORT_ENABLED=1
     export LD_LIBRARY_PATH="${CRAY_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
+    MIN_MSG_SIZE=$((1024))
+    MAX_MSG_SIZE=$((1024 * 32))
+    REPEATS=100
 
     echo start gemm: $(date)
     CMD="srun -N $NUM_NODES -n $NUM_TASKS \
@@ -48,7 +52,7 @@ OUTPUT_FILE=$OUTPUT_DIR/output-gemm.log
             --gpus-per-task 1 \
             --ntasks-per-node 8 \
             --output $OUTPUT_FILE \
-            $EXEC"
+            $EXEC $MIN_MSG_SIZE $MAX_MSG_SIZE $REPEATS"
     echo running:
     echo $CMD
     $CMD
