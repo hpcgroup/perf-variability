@@ -71,14 +71,15 @@ Repository: [AMG2023](https://github.com/hpcgroup/AMG2023/)
     - Clone hypre v2.32.0 and navigate to src: 
         ```sh
         git clone -b v2.32.0 https://github.com/hypre-space/hypre.git
-        cd into ~/hypre/src
+        cd hypre/src
         ```
     - Configure hypre (in hypre/src)
         ```sh
         ./configure --with-hip --enable-device-memory-pool --enable-mixedint --with-gpu-arch=gfx90a \
             --with-MPI-lib-dirs="${MPICH_DIR}/lib" --with-MPI-libs="mpi" \
             --with-MPI-include="${MPICH_DIR}/include" \
-            CFLAGS="-I${ROCM_PATH}/include/ -I${ROCM_PATH}/llvm/include/ -I${ROCM_PATH}/include/rocsparse/" \
+            CFLAGS="-g -I${ROCM_PATH}/include/ -I${ROCM_PATH}/llvm/include/ \
+            -I${ROCM_PATH}/include/rocsparse/" \
             LDFLAGS="-L${ROCM_PATH}/lib/ -L${ROCM_PATH}/llvm/lib/ -lrocsparse"
         ```
     - Compile hypre (in hypre/src)
