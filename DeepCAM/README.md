@@ -9,6 +9,83 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
 
 ### Setup steps
 
+#### 1. Environment Setup
+- Load necessary modules:
+    ```bash
+    module load PrgEnv-nvidia cray-mpich cudatoolkit craype-accel-nvidia80 python/3.10 nccl cudnn cray-hdf5
+    ```
+- Create and activate a Python virtual environment:
+    ```bash
+    # Choose a suitable location for your environment, e.g., within your project directory
+    # python -m venv /path/to/your/env/torch2.5-py3.10 --system-site-packages
+    # source /path/to/your/env/torch2.5-py3.10/bin/activate
+
+    # Example using a relative path:
+    python -m venv torch2.5-py3.10 --system-site-packages
+    source torch2.5-py3.10/bin/activate
+    ```
+- Upgrade pip:
+    ```bash
+    pip install --upgrade pip
+    ```
+
+#### 2. Install Core Dependencies
+- Install PyTorch, torchvision, and torchaudio for CUDA 12.1:
+    ```bash
+    pip install torch==2.5.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    ```
+- Install other required Python packages:
+    ```bash
+    pip install mpi4py pillow pandas pyyaml scipy h5py
+    pip install cupy-cuda12x
+    pip install pynvml
+    pip install nvidia-dali-cuda120
+    ```
+
+#### 3. Install MLPerf and Logging Libraries
+- Install MLPerf common utilities:
+    ```bash
+    pip install "git+https://github.com/NVIDIA/mlperf-common.git"
+    ```
+- Install MLPerf logging library:
+    ```bash
+    pip install "git+https://github.com/mlperf/logging.git"
+    ```
+
+#### 4. Install NVIDIA Apex
+- Clone the Apex repository and checkout a specific commit:
+    ```bash
+    # Choose a location for repositories, e.g., ./repos
+    # mkdir -p ./repos && cd ./repos
+    git clone https://github.com/NVIDIA/apex
+    cd apex
+    git checkout 89cc215a
+    ```
+- Install Apex dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+- **Important:** Manually comment out line 32 in `setup.py` before proceeding.
+
+- Set the C++ compiler and install Apex with CUDA extensions:
+    ```bash
+    export CXX=/usr/bin/g++
+    pip install -v --disable-pip-version-check --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+    cd ..
+    ```
+
+#### 5. Install DeepCAM IO Helpers
+- Navigate to the DeepCAM IO helpers directory within your cloned DeepCAM source code:
+    ```bash
+    # Adjust the path based on where you cloned the DeepCAM source code
+    # cd /pscratch/sd/c/cunyang/deepcam/optimized_pm/HPE+LBNL/benchmarks/deepcam/implementations/deepcam-pytorch/io_helpers
+    cd path/to/your/deepcam-pytorch/io_helpers
+    ```
+- Install the IO helpers package in editable mode:
+    ```bash
+    pip install -e .
+    ```
+
 ## Frontier Setup
 
 ### Setup steps
@@ -126,6 +203,11 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
     git clone https://github.com/hpcgroup/hpc.git hpc
     ```
 
-#### 3. Download dataset with globus
+# Download dataset with globus
+
+## Perlmutter
+- Refer to [Link](https://gitlab.com/NERSC/N10-benchmarks/deepcam/-/blob/main/data/globus.md)
+
+## Frontier
 - [Globus Link](https://app.globus.org/file-manager?origin_id=0b226e2c-4de0-11ea-971a-021304b0cca7&origin_path=%2F)
     - Download to `$DEEPCAM_ROOT/data`

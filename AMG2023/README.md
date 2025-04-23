@@ -1,7 +1,5 @@
 # AMG2023 README
-For more detailed installation parameters, please refer to the [installation document](https://github.com/pssg-int/AMG2023/blob/main/amg-doc.pdf).
-
-Repository: [AMG2023](https://github.com/hpcgroup/AMG2023/)
+For more detailed installation parameters, please refer to the [installation document](https://github.com/LLNL/AMG2023/blob/main/amg-doc.pdf).
 
 ## Perlmutter Compilation
 
