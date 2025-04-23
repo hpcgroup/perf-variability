@@ -98,6 +98,8 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
     module load rocm/6.1.3
     module load craype-accel-amd-gfx90a
     module load cray-python/3.9.13.1
+    module load cray-hdf5-parallel/1.12.2.9
+    ```
 - Create env variables
     ```bash
     DEEPCAM_ROOT=/lustre/orion/csc547/scratch/keshprad/deepcam/
@@ -182,7 +184,7 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
     cd ${DEEPCAM_ROOT}/repos
 
     git clone -b hpc-1.0-branch https://github.com/mlcommons/logging mlperf-logging
-    # may need to manually change mlperf-logging/VERSION to a valid version number (e.g. 1.0.0.rc2)
+    # NOTE: you may need to manually change mlperf-logging/VERSION to a valid version number (e.g. 1.0.0.rc2)
     pip install -e mlperf-logging
 
     rm ${PYVENV_SITEPKGS}/mlperf-logging.egg-link
@@ -191,16 +193,17 @@ Frontier Repository: [hpc](https://github.com/hpcgroup/hpc)
     ```
 
 #### 2. Download src code
-- Download from PSSG Frontier repo for DeepCAM (linked at top of README)
+- Download DeepCAM source (linked at top of README)
     ```bash
     # REPLACE WITH YOUR PATH
-    PRFX=/lustre/orion/csc547/scratch/keshprad
+    PRFX=/lustre/orion/csc569/scratch/keshprad
     DEEPCAM_ROOT=${PRFX}/deepcam
 
     mkdir -p ${DEEPCAM_ROOT}
     cd ${DEEPCAM_ROOT}
 
     git clone https://github.com/hpcgroup/hpc.git hpc
+    cd ./hpc/deepcam/src/deepCam
     ```
 
 # Download dataset with globus
