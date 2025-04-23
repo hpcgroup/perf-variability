@@ -62,8 +62,6 @@ cd ${MILC_QCD_DIR}
 cp Makefile ks_imp_rhmc
 cd ks_imp_rhmc
 
-export CUDA_MATH=/opt/nvidia/hpc_sdk/Linux_x86_64/22.5/math_libs/11.7/lib64
-
 rm -f ../libraries/*.[ao]
 make clean
 
